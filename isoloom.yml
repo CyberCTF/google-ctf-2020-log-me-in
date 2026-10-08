@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=https://www.isoloom.com/schema/v1.json
+# Log-Me-In (Google's 2020 security competition, by Google; a web challenge) as an Isoloom spec:
+# an Express login page that passes the parsed request body straight to the mysql library, so a
+# field can be an object instead of a string. The challenge folder 2020/quals/web-log-me-in of
+# Google's challenge archive is vendored unchanged, split between build/log-me-in/app/ (the Node app)
+# and build/db/app/ (upstream's MySQL Dockerfile and SQL).
+# `isoloom generate`, then `isoloom run docker`.
+version: 1
+name: google-ctf-2020-log-me-in
+
+networks:
+  lab: { cidr: 10.60.172.0/24, internet: false }
+
+machines:
+  db:
+    networks: { lab: 11 }
+    services: [{ port: 3306, name: mysql }]
+    resources: { cpus: 1, memory_mb: 768 }
+    docker:
+      build: build/db
+  log-me-in:
+    networks: { lab: 10 }
+    services: [{ port: 8088, name: web, http: true, publish: 8088 }]
+    resources: { cpus: 1, memory_mb: 256 }
+    depends_on: [db]
+    docker:
+      build: build/log-me-in
+
+checks:
+  - name: the web app answers
+    http: http://log-me-in:8088/login
+    wait: 180
+  - name: the login form answers a wrong password from the database
+    script: checks/probe.sh
+    wait: 180
+
+message: |
+  Log-Me-In (Google, 2020) answers at http://localhost:{{ machines.log-me-in.services.0.publish }}/.
+  Only Michelle's account has the flag. How does the server parse the fields of your login form?

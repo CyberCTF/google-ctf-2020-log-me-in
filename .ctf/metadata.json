@@ -1,0 +1,15 @@
+{
+  "title": "Google CTF 2020: Log-Me-In",
+  "description": "An Express site where only Michelle's account can read the flag. The login form's body is parsed with extended syntax and passed to the mysql library's query placeholders.",
+  "question": "Retrieve the flag from the web app.",
+  "category": "WEB",
+  "difficulty": 2,
+  "evidence_kind": "SECRET",
+  "capabilities": [
+    "sql-injection",
+    "nodejs",
+    "express",
+    "type-confusion",
+    "authentication-bypass"
+  ]
+}

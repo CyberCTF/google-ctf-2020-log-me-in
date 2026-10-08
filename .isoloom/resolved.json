@@ -1,0 +1,214 @@
+{
+  "generated_by_isoloom": "from isoloom.yml; don't edit: change the spec and run `isoloom generate` (`isoloom check` fails when this file is out of date)",
+  "resolved_version": 1,
+  "name": "google-ctf-2020-log-me-in",
+  "instance": null,
+  "inputs": [],
+  "networks": {
+    "lab": {
+      "cidr": "10.60.172.0/24",
+      "docker_cidr": "10.60.172.0/24",
+      "internet": false,
+      "gateway": null,
+      "gateway_address": "10.60.172.1",
+      "router": null,
+      "controller": "10.60.172.253"
+    }
+  },
+  "reach": [],
+  "machines": {
+    "db": {
+      "access": false,
+      "supplied": false,
+      "shapes": [
+        "docker"
+      ],
+      "arch": "amd64",
+      "os": null,
+      "windows": false,
+      "addresses": {
+        "lab": "10.60.172.11"
+      },
+      "docker_addresses": {
+        "lab": "10.60.172.11"
+      },
+      "services": [
+        {
+          "port": 3306,
+          "name": "mysql",
+          "http": false,
+          "publish": null
+        }
+      ],
+      "depends_on": [],
+      "inputs": [],
+      "volumes": {},
+      "resources": {
+        "cpus": 1,
+        "memory_mb": 768,
+        "disk_gb": 20
+      },
+      "gateway_of": [],
+      "routes": [],
+      "default_gateway": null,
+      "offline": true
+    },
+    "log-me-in": {
+      "access": false,
+      "supplied": false,
+      "shapes": [
+        "docker"
+      ],
+      "arch": "amd64",
+      "os": null,
+      "windows": false,
+      "addresses": {
+        "lab": "10.60.172.10"
+      },
+      "docker_addresses": {
+        "lab": "10.60.172.10"
+      },
+      "services": [
+        {
+          "port": 8088,
+          "name": "web",
+          "http": true,
+          "publish": 8088
+        }
+      ],
+      "depends_on": [
+        "db"
+      ],
+      "inputs": [],
+      "volumes": {},
+      "resources": {
+        "cpus": 1,
+        "memory_mb": 256,
+        "disk_gb": 20
+      },
+      "gateway_of": [],
+      "routes": [],
+      "default_gateway": null,
+      "offline": true
+    }
+  },
+  "start_order": [
+    "db",
+    "log-me-in"
+  ],
+  "clones": {},
+  "tools": {},
+  "groups": {},
+  "router": null,
+  "controller": {
+    "addresses": {
+      "lab": "10.60.172.253"
+    }
+  },
+  "published": [
+    {
+      "machine": "log-me-in",
+      "port": 8088,
+      "host_port": 8088
+    }
+  ],
+  "targets": {
+    "possible": [
+      "docker",
+      "hosted",
+      "docker-vm",
+      "cloud-docker",
+      "kubernetes"
+    ],
+    "generated": [
+      "docker",
+      "hosted",
+      "docker-vm",
+      "cloud-docker",
+      "kubernetes"
+    ],
+    "refused": {},
+    "not_possible": {
+      "hybrid": "only when some machines are containers and others are VMs",
+      "vagrant": "needs `vm:` on db, log-me-in",
+      "proxmox": "needs `vm:` on db, log-me-in",
+      "cloud-vm": "needs `vm:` on db, log-me-in",
+      "external": "needs `external:` on db, log-me-in"
+    }
+  },
+  "checks": {
+    "default_position": "networks",
+    "positions": [
+      {
+        "position": "networks",
+        "machine": null,
+        "runner": "isoloom-check",
+        "checks": [
+          {
+            "name": "the web app answers",
+            "derived": false,
+            "kind": "http",
+            "target": "http://log-me-in:8088/login",
+            "expect": "200",
+            "wait": 180
+          },
+          {
+            "name": "the login form answers a wrong password from the database",
+            "derived": false,
+            "kind": "script",
+            "target": "checks/probe.sh",
+            "expect": "",
+            "wait": 180
+          }
+        ]
+      },
+      {
+        "position": "db",
+        "machine": "db",
+        "runner": "isoloom-check-db",
+        "checks": [
+          {
+            "name": "log-me-in:8088 from db",
+            "derived": true,
+            "kind": "http",
+            "target": "http://10.60.172.10:8088/",
+            "expect": "any",
+            "wait": 30
+          },
+          {
+            "name": "no internet from db",
+            "derived": true,
+            "kind": "http",
+            "target": "http://1.1.1.1/",
+            "expect": "blocked",
+            "wait": 0
+          }
+        ]
+      },
+      {
+        "position": "log-me-in",
+        "machine": "log-me-in",
+        "runner": "isoloom-check-log-me-in",
+        "checks": [
+          {
+            "name": "db:3306 from log-me-in",
+            "derived": true,
+            "kind": "tcp",
+            "target": "10.60.172.11:3306",
+            "expect": "open",
+            "wait": 30
+          },
+          {
+            "name": "no internet from log-me-in",
+            "derived": true,
+            "kind": "http",
+            "target": "http://1.1.1.1/",
+            "expect": "blocked",
+            "wait": 0
+          }
+        ]
+      }
+    ]
+  },
+  "message": "Log-Me-In (Google, 2020) answers at http://localhost:8088/.\nOnly Michelle's account has the flag. How does the server parse the fields of your login form?\n"
+}
