@@ -4,12 +4,5 @@
   "question": "Retrieve the flag from the web app.",
   "category": "WEB",
   "difficulty": 2,
-  "evidence_kind": "SECRET",
-  "capabilities": [
-    "sql-injection",
-    "nodejs",
-    "express",
-    "type-confusion",
-    "authentication-bypass"
-  ]
+  "evidence_kind": "SECRET"
 }
