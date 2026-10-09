@@ -133,7 +133,8 @@
       "vagrant": "needs `vm:` on db, log-me-in",
       "proxmox": "needs `vm:` on db, log-me-in",
       "cloud-vm": "needs `vm:` on db, log-me-in",
-      "external": "needs `external:` on db, log-me-in"
+      "external": "needs `external:` on db, log-me-in",
+      "cloud-services": "left out by `targets:`"
     }
   },
   "checks": {
