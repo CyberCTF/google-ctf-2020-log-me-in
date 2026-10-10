@@ -1,0 +1,66 @@
+{
+  "objectives": [
+    {
+      "key": "main",
+      "title": "Read Michelle's flag",
+      "prompt": "Log in to the Express site as Michelle and read the flag on the flag page.",
+      "check": {
+        "evidence": "SECRET",
+        "format": "CTF{%s}"
+      },
+      "dev": "CTF{dev-google-ctf-2020-log-me-in}",
+      "hints": [
+        "The login form is parsed by the urlencoded body parser in extended mode: a field does not have to be a string.",
+        "Read how the Node.js mysql library turns an object passed as a query value into SQL."
+      ],
+      "steps": [
+        {
+          "key": "framework",
+          "title": "Identify the framework",
+          "prompt": "Which Node.js web framework serves the login page? (name only)",
+          "check": {
+            "answer": [
+              "express",
+              "express.js",
+              "expressjs"
+            ]
+          }
+        },
+        {
+          "key": "library",
+          "title": "Find the database library",
+          "prompt": "Which Node.js library builds the login query? (package name)",
+          "check": {
+            "answer": [
+              "mysql",
+              "mysqljs",
+              "node-mysql"
+            ]
+          }
+        },
+        {
+          "key": "class",
+          "title": "Name the vulnerability class",
+          "prompt": "What vulnerability class lets an object-typed field change the meaning of the login query?",
+          "check": {
+            "answer": [
+              "sql injection",
+              "sqli",
+              "sql-injection"
+            ]
+          }
+        },
+        {
+          "key": "account",
+          "title": "Pick the target",
+          "prompt": "Which user's account holds the flag? (username)",
+          "check": {
+            "answer": [
+              "michelle"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

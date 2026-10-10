@@ -3,6 +3,8 @@
 # `DEV=1 npm start --prefix ./app/ ./app/app.js` next to the MySQL container. This Dockerfile does that:
 # - Node.js 12 (App Engine's nodejs12 runtime), dependencies from upstream's package-lock.json (`npm ci`);
 # - DEV=1, upstream's local mode, in which the app connects to MySQL on localhost:3306 as user ctf;
+# - CyberCTF: Michelle's flag is read from /ctf/flag (the player's flag, written by ctf/flag.sh at
+#   every start) at each request instead of upstream's constant, which stays the fallback;
 # - a small Node TCP relay on 127.0.0.1:3306 to the `db` machine, since the database is its own machine.
 FROM node:12.22.12
 
@@ -10,6 +12,8 @@ WORKDIR /srv/app
 COPY app/app/package.json app/app/package-lock.json ./
 RUN npm ci --production
 COPY app/app/ ./
+RUN sed -i 's|flag = flagValue$|flag = (fs => fs.existsSync("/ctf/flag") ? fs.readFileSync("/ctf/flag", "utf8").trim() : flagValue)(require("fs"))|' app.js && \
+    grep -q '"/ctf/flag"' app.js
 
 ENV DEV=1 PORT=8088
 EXPOSE 8088
