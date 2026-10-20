@@ -9,28 +9,38 @@ version: 1
 name: google-ctf-2020-log-me-in
 
 # Given by the CyberCTF launcher: this player's flag. Without it the development flag.
-inputs: [CTF_FLAG_MAIN]
+inputs:
+  CTF_FLAG_MAIN: {}
 
 networks:
-  lab: { cidr: 10.60.172.0/24, internet: false }
+  lab: {cidr: 10.60.172.0/24, internet: false}
 
 machines:
   db:
-    networks: { lab: 11 }
-    services: [{ port: 3306, name: mysql }]
-    resources: { cpus: 1, memory_mb: 768 }
-    docker:
+    networks: {lab: 11}
+    resources: {cpus: 1, memory_mb: 768}
+    ports:
+      mysql:
+        port: 3306
+    app:
       build: build/db
   log-me-in:
-    networks: { lab: 10 }
-    services: [{ port: 8088, name: web, http: true, publish: 8088 }]
-    resources: { cpus: 1, memory_mb: 256 }
+    networks: {lab: 10}
+    resources: {cpus: 1, memory_mb: 256}
     depends_on: [db]
-    inputs: [CTF_FLAG_MAIN]
-    volumes: { ctf: /ctf }   # the flag, written by ctf/flag.sh at every start
-    docker:
+    volumes: {ctf: /ctf}     # the flag, written by ctf/flag.sh at every start
+    ports:
+      web:
+        port: 8088
+        protocol: http
+        publish: true
+    files:
+      - path: /run/lab/ctf_flag_main
+        input: CTF_FLAG_MAIN
+    setup:
+      - ctf/flag.sh
+    app:
       build: build/log-me-in
-      init: [ctf/flag.sh]
 
 checks:
   - name: the web app answers
@@ -41,5 +51,5 @@ checks:
     wait: 180
 
 message: |
-  Log-Me-In (Google, 2020) answers at http://localhost:{{ machines.log-me-in.services.0.publish }}/.
+  Log-Me-In (Google, 2020) answers at {{ machines.log-me-in.ports.web.url }}.
   Only Michelle's account has the flag. How does the server parse the fields of your login form?
